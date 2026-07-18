@@ -1,0 +1,48 @@
+{
+  "title": "Calidad del aire - Lima",
+  "uid": "aire-lima-pm25",
+  "schemaVersion": 39,
+  "version": 1,
+  "timezone": "America/Lima",
+  "time": { "from": "now-7d", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "PM2.5 por estación (últimos 7 días)",
+      "type": "timeseries",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "postgres-lima-ambiental" },
+      "fieldConfig": {
+        "defaults": { "unit": "µg/m³" },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawSql": "SELECT m.medido_en AS \"time\", e.nombre AS metric, m.valor FROM mediciones_aire m JOIN estaciones e ON e.id = m.estacion_id WHERE m.parametro = 'pm25' AND $__timeFilter(m.medido_en) ORDER BY 1",
+          "rawQuery": true
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Predicción PM2.5 (próximas 24h)",
+      "type": "timeseries",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 10 },
+      "datasource": { "type": "postgres", "uid": "postgres-lima-ambiental" },
+      "fieldConfig": {
+        "defaults": { "unit": "µg/m³" },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawSql": "SELECT p.timestamp_prediccion AS \"time\", e.nombre AS metric, p.valor_predicho AS valor FROM predicciones_pm25 p JOIN estaciones e ON e.id = p.estacion_id WHERE p.generado_en = (SELECT max(generado_en) FROM predicciones_pm25) ORDER BY 1",
+          "rawQuery": true
+        }
+      ]
+    }
+  ]
+}

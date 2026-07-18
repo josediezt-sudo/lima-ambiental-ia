@@ -1,0 +1,18 @@
+apiVersion: 1
+
+datasources:
+  - name: Postgres Lima Ambiental
+    uid: postgres-lima-ambiental
+    type: postgres
+    access: proxy
+    url: db:5432
+    database: $__env{POSTGRES_DB}
+    user: $__env{POSTGRES_USER}
+    secureJsonData:
+      password: $__env{POSTGRES_PASSWORD}
+    jsonData:
+      sslmode: disable
+      postgresVersion: 1600
+      timescaledb: false
+    isDefault: true
+    editable: true
