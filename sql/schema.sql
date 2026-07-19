@@ -59,3 +59,85 @@ CREATE TABLE IF NOT EXISTS residuos_distrito (
 
 CREATE INDEX IF NOT EXISTS idx_residuos_distrito_anio
     ON residuos_distrito (distrito, anio);
+
+-- Sistema Local de Gestión Ambiental (SLGA) — seguimiento institucional/normativo.
+-- Ver docs/slga.md para el marco legal (Ley 28245, D.S. 008-2005-PCM, Ley 27972,
+-- Guía SLGA RM 101-2021-MINAM) y el mapeo de cada tabla a su instrumento oficial.
+
+CREATE TABLE IF NOT EXISTS instrumentos_gestion_ambiental (
+    id                      SERIAL PRIMARY KEY,
+    tipo                    TEXT NOT NULL CHECK (tipo IN (
+                                'politica_ambiental_local',
+                                'diagnostico_ambiental_local',
+                                'plan_accion_ambiental_local',
+                                'agenda_ambiental_local',
+                                'pigars',
+                                'planefa',
+                                'ordenanza_ambiental',
+                                'otro'
+                            )),
+    nombre                  TEXT NOT NULL,
+    estado                  TEXT NOT NULL DEFAULT 'en_elaboracion' CHECK (estado IN (
+                                'vigente', 'en_elaboracion', 'vencido', 'desactualizado'
+                            )),
+    norma_aprobacion        TEXT,           -- ej. "Ordenanza N° 123-2024-MDX"
+    fecha_aprobacion        DATE,
+    fecha_revision_prevista DATE,
+    documento_url           TEXT,
+    responsable             TEXT,
+    notas                   TEXT,
+    actualizado_en          TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_instrumentos_estado
+    ON instrumentos_gestion_ambiental (estado, fecha_revision_prevista);
+
+CREATE TABLE IF NOT EXISTS cam_integrantes (
+    id                  SERIAL PRIMARY KEY,
+    institucion         TEXT NOT NULL,
+    sector              TEXT NOT NULL CHECK (sector IN ('publico', 'privado', 'sociedad_civil')),
+    representante       TEXT,
+    cargo               TEXT,
+    fecha_incorporacion DATE,
+    vigente             BOOLEAN NOT NULL DEFAULT true
+);
+
+CREATE TABLE IF NOT EXISTS cam_sesiones (
+    id          SERIAL PRIMARY KEY,
+    fecha       DATE NOT NULL,
+    tipo        TEXT NOT NULL CHECK (tipo IN ('ordinaria', 'extraordinaria')),
+    asistentes  INTEGER,
+    acuerdos    TEXT,
+    acta_url    TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_cam_sesiones_fecha ON cam_sesiones (fecha DESC);
+
+CREATE TABLE IF NOT EXISTS planefa_acciones (
+    id                      SERIAL PRIMARY KEY,
+    anio                    INTEGER NOT NULL,
+    unidad_fiscalizable     TEXT NOT NULL,
+    tipo_accion             TEXT NOT NULL,   -- ej. 'supervision', 'monitoreo', 'evaluacion'
+    trimestre_programado    INTEGER CHECK (trimestre_programado BETWEEN 1 AND 4),
+    estado                  TEXT NOT NULL DEFAULT 'programada' CHECK (estado IN (
+                                'programada', 'ejecutada', 'reprogramada', 'cancelada'
+                            )),
+    resultado               TEXT,
+    notas                   TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_planefa_anio ON planefa_acciones (anio, estado);
+
+CREATE TABLE IF NOT EXISTS indicadores_gals (
+    id              SERIAL PRIMARY KEY,
+    dimension       TEXT NOT NULL CHECK (dimension IN (
+                        'calidad_ambiental', 'institucionalidad_ciudadania', 'aprovechamiento_rrnn_cc'
+                    )),
+    indicador       TEXT NOT NULL,
+    nivel_objetivo  TEXT NOT NULL CHECK (nivel_objetivo IN ('GALS I', 'GALS II')),
+    avance_pct      DOUBLE PRECISION CHECK (avance_pct BETWEEN 0 AND 100),
+    fecha_corte     DATE NOT NULL,
+    notas           TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_indicadores_gals_fecha ON indicadores_gals (fecha_corte DESC);

@@ -33,6 +33,17 @@ Investigación de referencia para el proyecto, con notas honestas sobre disponib
 - **Sentinelsat** (librería Python) — https://github.com/sentinelsat/sentinelsat
 - **awesome-sentinel** (catálogo de herramientas) — https://github.com/kr-stn/awesome-sentinel
 
+## Marco normativo de gestión ambiental municipal (SLGA)
+
+No son "fuentes de datos" en el sentido de API, sino el marco legal que define qué
+debe existir y trackearse a nivel institucional en cada municipalidad. Ver el
+detalle completo y su mapeo al modelo de datos en [`docs/slga.md`](slga.md).
+
+- **Ley N° 28245** — Ley Marco del Sistema Nacional de Gestión Ambiental.
+- **RM N° 101-2021-MINAM** — Guía para el funcionamiento de los Sistemas Locales de Gestión Ambiental (SLGA).
+- **Sistema de Información Ambiental Local (SIAL)** — https://sial.minam.gob.pe/ (portales oficiales por provincia; parte del SINIA).
+- **Reconocimiento GALS** — https://www.minam.gob.pe/gals/
+
 ## Otros datos abiertos peruanos relevantes
 
 - **MEF — Datos Abiertos** — https://datosabiertos.mef.gob.pe/ (para cruzar inversión pública con proyectos ambientales municipales, si se necesita en fases posteriores).

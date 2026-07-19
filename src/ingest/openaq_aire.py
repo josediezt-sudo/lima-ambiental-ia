@@ -6,6 +6,7 @@ import os
 
 import requests
 
+from src.config import cargar_municipio
 from src.db import get_connection, upsert_estacion, upsert_medicion_aire
 
 BASE_URL = "https://api.openaq.org/v3"
@@ -16,10 +17,9 @@ def _headers() -> dict:
     return {"X-API-Key": api_key}
 
 
-def obtener_ubicaciones_lima() -> list[dict]:
-    lat = os.environ.get("OPENAQ_LAT", "-12.0464")
-    lon = os.environ.get("OPENAQ_LON", "-77.0428")
-    radius = os.environ.get("OPENAQ_RADIUS_M", "30000")
+def obtener_ubicaciones_cercanas() -> list[dict]:
+    monitoreo = cargar_municipio()["monitoreo"]
+    lat, lon, radius = monitoreo["lat"], monitoreo["lon"], monitoreo["radio_m"]
 
     resp = requests.get(
         f"{BASE_URL}/locations",
@@ -43,8 +43,9 @@ def obtener_ultimas_mediciones(sensor_id: int, limit: int = 24) -> list[dict]:
 
 
 def ejecutar() -> None:
-    ubicaciones = obtener_ubicaciones_lima()
-    print(f"OpenAQ: {len(ubicaciones)} estaciones encontradas cerca de Lima")
+    municipio = cargar_municipio()["municipalidad"]
+    ubicaciones = obtener_ubicaciones_cercanas()
+    print(f"OpenAQ: {len(ubicaciones)} estaciones encontradas cerca de {municipio['nombre']}")
 
     conn = get_connection()
     try:

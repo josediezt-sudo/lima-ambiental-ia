@@ -1,0 +1,106 @@
+# Datos de ejemplo para probar el dashboard SLGA sin tener que cargar información
+# real primero. Cárgalos con: python -m src.slga.cli seed-ejemplo
+# Reemplázalos por los datos reales de tu municipalidad cuando estés listo
+# (puedes editar este archivo directamente o usar los comandos *-add de la CLI).
+
+instrumentos:
+  - tipo: politica_ambiental_local
+    nombre: "Política Ambiental Local 2024-2030"
+    estado: vigente
+    norma_aprobacion: "Ordenanza N° 001-2024-MDX"
+    fecha_aprobacion: "2024-02-15"
+    fecha_revision_prevista: "2030-02-15"
+    responsable: "Gerencia de Servicios a la Ciudad y Gestión Ambiental"
+
+  - tipo: diagnostico_ambiental_local
+    nombre: "Diagnóstico Ambiental Local (DAL) 2023"
+    estado: vigente
+    fecha_aprobacion: "2023-11-30"
+    fecha_revision_prevista: "2027-11-30"
+
+  - tipo: plan_accion_ambiental_local
+    nombre: "Plan de Acción Ambiental Local (PAAL) 2024-2026"
+    estado: vigente
+    fecha_aprobacion: "2024-03-01"
+    fecha_revision_prevista: "2026-12-31"
+
+  - tipo: agenda_ambiental_local
+    nombre: "Agenda Ambiental Local 2025-2026"
+    estado: en_elaboracion
+    fecha_revision_prevista: "2026-08-31"
+    responsable: "CAM"
+
+  - tipo: pigars
+    nombre: "Plan Integral de Gestión Ambiental de Residuos Sólidos"
+    estado: desactualizado
+    fecha_aprobacion: "2018-05-20"
+    fecha_revision_prevista: "2026-09-30"
+    notas: "Pendiente actualizar bajo el marco del Decreto Legislativo 1278"
+
+  - tipo: planefa
+    nombre: "PLANEFA 2026"
+    estado: vigente
+    fecha_aprobacion: "2026-01-15"
+    fecha_revision_prevista: "2026-12-31"
+
+cam_integrantes:
+  - institucion: "Municipalidad (Alcaldía)"
+    sector: publico
+    representante: "Alcalde/sa"
+    cargo: "Presidencia CAM"
+    fecha_incorporacion: "2023-01-01"
+  - institucion: "Gerencia de Servicios a la Ciudad y Gestión Ambiental"
+    sector: publico
+    cargo: "Secretaría Técnica"
+    fecha_incorporacion: "2023-01-01"
+  - institucion: "Cámara de Comercio local"
+    sector: privado
+    fecha_incorporacion: "2023-02-01"
+  - institucion: "Asociación de vecinos"
+    sector: sociedad_civil
+    fecha_incorporacion: "2023-02-01"
+
+cam_sesiones:
+  - fecha: "2026-02-10"
+    tipo: ordinaria
+    asistentes: 14
+    acuerdos: "Aprobación del plan de trabajo anual de la CAM"
+  - fecha: "2026-05-12"
+    tipo: ordinaria
+    asistentes: 11
+    acuerdos: "Seguimiento a la actualización del PIGARS"
+
+planefa_acciones:
+  - anio: 2026
+    unidad_fiscalizable: "Comercio ambulatorio - zona centro"
+    tipo_accion: supervision
+    trimestre_programado: 1
+    estado: ejecutada
+    resultado: "Sin hallazgos relevantes"
+  - anio: 2026
+    unidad_fiscalizable: "Puntos críticos de acumulación de residuos"
+    tipo_accion: monitoreo
+    trimestre_programado: 2
+    estado: ejecutada
+  - anio: 2026
+    unidad_fiscalizable: "Establecimientos con emisiones de ruido"
+    tipo_accion: supervision
+    trimestre_programado: 3
+    estado: programada
+
+indicadores_gals:
+  - dimension: calidad_ambiental
+    indicador: "Cobertura de monitoreo de calidad de aire"
+    nivel_objetivo: "GALS I"
+    avance_pct: 65
+    fecha_corte: "2026-06-30"
+  - dimension: institucionalidad_ciudadania
+    indicador: "Instrumentos de gestión ambiental vigentes"
+    nivel_objetivo: "GALS I"
+    avance_pct: 70
+    fecha_corte: "2026-06-30"
+  - dimension: aprovechamiento_rrnn_cc
+    indicador: "Acciones de adaptación al cambio climático implementadas"
+    nivel_objetivo: "GALS I"
+    avance_pct: 40
+    fecha_corte: "2026-06-30"

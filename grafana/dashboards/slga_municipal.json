@@ -1,0 +1,138 @@
+{
+  "title": "Gestión Ambiental Municipal - SLGA",
+  "uid": "slga-municipal",
+  "schemaVersion": 39,
+  "version": 1,
+  "timezone": "America/Lima",
+  "time": { "from": "now-1y", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Instrumentos vigentes",
+      "type": "stat",
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "postgres-lima-ambiental" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [
+        { "color": "red", "value": null }, { "color": "green", "value": 1 }
+      ] } }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT count(*) AS valor FROM instrumentos_gestion_ambiental WHERE estado = 'vigente'",
+          "rawQuery": true
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Instrumentos vencidos/desactualizados",
+      "type": "stat",
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "postgres-lima-ambiental" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [
+        { "color": "green", "value": null }, { "color": "red", "value": 1 }
+      ] } }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT count(*) AS valor FROM instrumentos_gestion_ambiental WHERE estado IN ('vencido', 'desactualizado')",
+          "rawQuery": true
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Sesiones CAM (año en curso)",
+      "type": "stat",
+      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "postgres-lima-ambiental" },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT count(*) AS valor FROM cam_sesiones WHERE date_part('year', fecha) = date_part('year', now())",
+          "rawQuery": true
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "PLANEFA ejecutadas / total (año en curso)",
+      "type": "stat",
+      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "postgres-lima-ambiental" },
+      "fieldConfig": { "defaults": { "unit": "percent" }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT round(100.0 * count(*) FILTER (WHERE estado = 'ejecutada') / greatest(count(*), 1)) AS valor FROM planefa_acciones WHERE anio = date_part('year', now())::int",
+          "rawQuery": true
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Instrumentos de gestión ambiental",
+      "type": "table",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 5 },
+      "datasource": { "type": "postgres", "uid": "postgres-lima-ambiental" },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT tipo, nombre, estado, fecha_aprobacion, fecha_revision_prevista, responsable FROM instrumentos_gestion_ambiental ORDER BY fecha_revision_prevista NULLS LAST",
+          "rawQuery": true
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Integrantes vigentes de la CAM",
+      "type": "table",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 15 },
+      "datasource": { "type": "postgres", "uid": "postgres-lima-ambiental" },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT institucion, sector, representante, cargo FROM cam_integrantes WHERE vigente = true ORDER BY sector, institucion",
+          "rawQuery": true
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Acciones PLANEFA (año en curso)",
+      "type": "table",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 15 },
+      "datasource": { "type": "postgres", "uid": "postgres-lima-ambiental" },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT unidad_fiscalizable, tipo_accion, trimestre_programado, estado, resultado FROM planefa_acciones WHERE anio = date_part('year', now())::int ORDER BY trimestre_programado",
+          "rawQuery": true
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Avance de indicadores GALS",
+      "type": "table",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 23 },
+      "datasource": { "type": "postgres", "uid": "postgres-lima-ambiental" },
+      "fieldConfig": { "defaults": { "unit": "percent" }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT dimension, indicador, nivel_objetivo, avance_pct, fecha_corte FROM indicadores_gals ORDER BY fecha_corte DESC",
+          "rawQuery": true
+        }
+      ]
+    }
+  ]
+}
