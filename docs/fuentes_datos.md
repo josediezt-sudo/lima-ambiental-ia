@@ -18,14 +18,34 @@ Investigación de referencia para el proyecto, con notas honestas sobre disponib
 - **OEFA — Datos Abiertos** — https://datosabiertos.oefa.gob.pe/home
   Fiscalización ambiental, sanciones, denuncias — útil para cruzar cumplimiento normativo con zonas de mayor generación de residuos.
 
-## Bosques, deforestación e incendios (fase 2, no implementado aún)
+## Agua
 
-- **Geobosques (MINAM/PNCBMCC)** — https://geobosques.minam.gob.pe/
-  Monitoreo satelital de cobertura forestal con alertas tempranas (cada 21–26 días) y servicios API/WMS públicos.
-- **Global Forest Watch** — Data API: https://data-api.globalforestwatch.org/ · portal: https://data.globalforestwatch.org/
-  Alertas GLAD (30m, semanal) y RADD (10m, casi tiempo real) de pérdida de cobertura arbórea. API REST/GeoJSON, stack open source en GitHub.
+- **SUNASS — Datos Abiertos (PNDA)** — https://datosabiertos.gob.pe/group/servicio-de-agua-potable-y-alcantarillado-de-lima
+  El organismo regulador de saneamiento publica indicadores de las EPS (empresas prestadoras) en la PNDA, incluida SEDAPAL (Lima Metropolitana) — ej. conexiones activas de agua potable. `src/ingest/ckan_generico.py` puede apuntar a estos datasets configurando `config/fuentes_ckan.yml`.
+- **ANA (Autoridad Nacional del Agua) — Red Nacional de Monitoreo de la Calidad de los Cuerpos de Agua**
+  Monitorea calidad de ríos/cuerpos de agua a nivel nacional; no se confirmó en vivo desde este entorno un endpoint API específico — verificar en su portal antes de configurar una fuente.
+- **SEDAPAL** no tiene una API pública documentada conocida — el acceso es vía los datasets que publica en la PNDA (arriba).
+
+## Ruido ambiental
+
+- **MINAM — Protocolo Nacional de Monitoreo de Ruido Ambiental (RM N° 227-2013-MINAM)**
+  Define la metodología oficial de monitoreo; no es en sí una fuente de datos continua, sino el marco que sigue OEFA y las municipalidades al hacer campañas puntuales de monitoreo (no telemetría permanente).
+- **OEFA** realiza campañas de monitoreo de ruido en Lima-Callao y publica los resultados como reportes — buscar en su portal de datos abiertos (`datosabiertos.oefa.gob.pe`) o en SINIA.
+
+## Áreas verdes
+
+- No se identificó un dataset único y confirmado de "m² de área verde por habitante" por distrito con API — este indicador suele aparecer en anuarios estadísticos (INEI — Anuario de Estadísticas Ambientales) o en reportes/ordenanzas municipales individuales. `indicadores_ambientales_distrito` está listo para recibirlo en cuanto se identifique una fuente concreta y estable.
+
+## Bosques, lomas costeras e incendios
+
+Lima Metropolitana **no tiene bosque amazónico** — Geobosques (pensado para monitorear la Amazonía) no aplica en su forma estándar a esta provincia. Lo relevante para Lima son los **incendios** (urbanos/periurbanos) y la **pérdida de cobertura vegetal en las lomas costeras** (ecosistemas de neblina en distritos del sur/este como Pachacámac, Villa María del Triunfo, Lurín, Punta Hermosa). Por eso el proyecto prioriza estas dos fuentes:
+
 - **NASA FIRMS** — https://firms.modaps.eosdis.nasa.gov/api/area/
-  Focos de calor/incendios activos (MODIS/VIIRS) en casi tiempo real (≤3h), con API de área y alertas por correo.
+  Focos de calor/incendios activos (MODIS/VIIRS) en casi tiempo real (≤3h), con API de área (requiere MAP_KEY gratuita). **Implementado en `src/ingest/nasa_firms.py`, API real y estable.**
+- **Global Forest Watch** — Data API: https://data-api.globalforestwatch.org/ · portal: https://data.globalforestwatch.org/
+  Alertas GLAD (30m, semanal) y RADD (10m, casi tiempo real) de pérdida de cobertura vegetal — no exclusivo de bosque amazónico, cubre cualquier cobertura arbórea/arbustiva detectable por satélite, incluidas lomas costeras. **Estructura implementada en `src/ingest/global_forest_watch.py`, pero no se pudo verificar en vivo el nombre/versión exacto del dataset ni el formato de autenticación vigente desde este entorno — confirmar contra la documentación actual antes de producción.**
+- **Geobosques (MINAM/PNCBMCC)** — https://geobosques.minam.gob.pe/
+  Monitoreo satelital de cobertura forestal amazónica con alertas tempranas y servicios API/WMS. No implementado aquí por el desajuste geográfico explicado arriba — relevante solo si el proyecto se adapta a una región con cobertura amazónica.
 
 ## Imágenes satelitales (insumo para modelos futuros)
 

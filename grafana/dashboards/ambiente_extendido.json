@@ -1,0 +1,99 @@
+{
+  "title": "Agua, ruido, áreas verdes e incendios - Lima Metropolitana",
+  "uid": "ambiente-extendido",
+  "schemaVersion": 39,
+  "version": 1,
+  "timezone": "America/Lima",
+  "time": { "from": "now-1y", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "distrito",
+        "type": "query",
+        "datasource": { "type": "postgres", "uid": "postgres-lima-ambiental" },
+        "query": "SELECT nombre FROM distritos ORDER BY nivel DESC, nombre",
+        "multi": true,
+        "includeAll": true,
+        "current": { "text": "All", "value": "$__all" }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Focos de calor / alertas forestales (últimos 30 días)",
+      "type": "stat",
+      "gridPos": { "h": 5, "w": 8, "x": 0, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "postgres-lima-ambiental" },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT count(*) AS valor FROM alertas_forestales a LEFT JOIN distritos d ON d.id = a.distrito_id WHERE a.detectado_en >= now() - interval '30 days' AND (d.nombre IN ($distrito) OR d.nombre IS NULL)",
+          "rawQuery": true
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Distritos con indicador de agua registrado",
+      "type": "stat",
+      "gridPos": { "h": 5, "w": 8, "x": 8, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "postgres-lima-ambiental" },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT count(DISTINCT t.distrito_id) AS valor FROM indicadores_ambientales_distrito t JOIN distritos d ON d.id = t.distrito_id WHERE t.dominio = 'agua' AND d.nombre IN ($distrito)",
+          "rawQuery": true
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Distritos con indicador de áreas verdes registrado",
+      "type": "stat",
+      "gridPos": { "h": 5, "w": 8, "x": 16, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "postgres-lima-ambiental" },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT count(DISTINCT t.distrito_id) AS valor FROM indicadores_ambientales_distrito t JOIN distritos d ON d.id = t.distrito_id WHERE t.dominio = 'areas_verdes' AND d.nombre IN ($distrito)",
+          "rawQuery": true
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Indicadores de agua, ruido y áreas verdes por distrito",
+      "type": "table",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 5 },
+      "datasource": { "type": "postgres", "uid": "postgres-lima-ambiental" },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT d.nombre AS distrito, t.dominio, t.indicador, t.anio, t.valor, t.unidad, t.fuente FROM indicadores_ambientales_distrito t JOIN distritos d ON d.id = t.distrito_id WHERE d.nombre IN ($distrito) ORDER BY t.anio DESC, d.nombre",
+          "rawQuery": true
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Alertas forestales / focos de calor recientes",
+      "type": "table",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 15 },
+      "datasource": { "type": "postgres", "uid": "postgres-lima-ambiental" },
+      "description": "Lima no tiene bosque amazónico: esto cubre principalmente incendios (NASA FIRMS) y pérdida de cobertura en lomas costeras (Global Forest Watch).",
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT coalesce(d.nombre, 'sin distrito asignado') AS distrito, a.tipo, a.fuente, a.detectado_en, a.confianza, a.lat, a.lon FROM alertas_forestales a LEFT JOIN distritos d ON d.id = a.distrito_id WHERE (d.nombre IN ($distrito) OR d.nombre IS NULL) ORDER BY a.detectado_en DESC LIMIT 200",
+          "rawQuery": true
+        }
+      ]
+    }
+  ]
+}

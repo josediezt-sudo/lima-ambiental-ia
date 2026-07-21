@@ -17,6 +17,7 @@ import os
 import requests
 
 from src.db import get_connection
+from src.distritos import cargar_distritos, resolver_distrito_por_nombre
 
 MAPEO_COLUMNAS = {
     "distrito": "distrito",
@@ -59,23 +60,34 @@ def ejecutar() -> None:
 
     conn = get_connection()
     filas_procesadas = 0
+    filas_omitidas = 0
     try:
+        distritos = cargar_distritos(conn)
+
         with conn.cursor() as cur:
             for recurso in recursos_csv:
                 filas = _descargar_csv(recurso["url"])
                 for fila in filas:
+                    nombre_distrito = fila.get(MAPEO_COLUMNAS["distrito"], "")
+                    distrito = resolver_distrito_por_nombre(distritos, nombre_distrito)
+                    if distrito is None:
+                        print(f"Distrito no reconocido, fila omitida: '{nombre_distrito}' "
+                              f"— revisa src/distritos.py:ALIAS_NOMBRE si es una variante conocida")
+                        filas_omitidas += 1
+                        continue
+
                     try:
                         cur.execute(
                             """
                             INSERT INTO residuos_distrito
-                                (distrito, anio, generacion_tn_dia, disposicion_final_pct, fuente, dataset_id)
+                                (distrito_id, anio, generacion_tn_dia, disposicion_final_pct, fuente, dataset_id)
                             VALUES (%s, %s, %s, %s, %s, %s)
-                            ON CONFLICT (distrito, anio, fuente) DO UPDATE
+                            ON CONFLICT (distrito_id, anio, fuente) DO UPDATE
                                 SET generacion_tn_dia = EXCLUDED.generacion_tn_dia,
                                     disposicion_final_pct = EXCLUDED.disposicion_final_pct
                             """,
                             (
-                                fila[MAPEO_COLUMNAS["distrito"]],
+                                distrito["id"],
                                 int(fila[MAPEO_COLUMNAS["anio"]]),
                                 float(fila[MAPEO_COLUMNAS["generacion_tn_dia"]] or 0) or None,
                                 float(fila[MAPEO_COLUMNAS["disposicion_final_pct"]] or 0) or None,
@@ -86,11 +98,12 @@ def ejecutar() -> None:
                         filas_procesadas += 1
                     except (KeyError, ValueError) as exc:
                         print(f"Fila omitida por columnas inesperadas: {exc}")
+                        filas_omitidas += 1
         conn.commit()
     finally:
         conn.close()
 
-    print(f"Residuos (PNDA): {filas_procesadas} filas importadas")
+    print(f"Residuos (PNDA): {filas_procesadas} filas importadas, {filas_omitidas} omitidas")
 
 
 if __name__ == "__main__":

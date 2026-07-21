@@ -1,10 +1,23 @@
 {
-  "title": "Calidad del aire - Lima",
+  "title": "Calidad del aire - Lima Metropolitana (43 distritos)",
   "uid": "aire-lima-pm25",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 2,
   "timezone": "America/Lima",
   "time": { "from": "now-7d", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "distrito",
+        "type": "query",
+        "datasource": { "type": "postgres", "uid": "postgres-lima-ambiental" },
+        "query": "SELECT nombre FROM distritos WHERE nivel = 'distrital' ORDER BY nombre",
+        "multi": true,
+        "includeAll": true,
+        "current": { "text": "All", "value": "$__all" }
+      }
+    ]
+  },
   "panels": [
     {
       "id": 1,
@@ -20,7 +33,7 @@
         {
           "refId": "A",
           "format": "time_series",
-          "rawSql": "SELECT m.medido_en AS \"time\", e.nombre AS metric, m.valor FROM mediciones_aire m JOIN estaciones e ON e.id = m.estacion_id WHERE m.parametro = 'pm25' AND $__timeFilter(m.medido_en) ORDER BY 1",
+          "rawSql": "SELECT m.medido_en AS \"time\", e.nombre || ' (' || coalesce(d.nombre, 'sin distrito') || ')' AS metric, m.valor FROM mediciones_aire m JOIN estaciones e ON e.id = m.estacion_id LEFT JOIN distritos d ON d.id = e.distrito_id WHERE m.parametro = 'pm25' AND $__timeFilter(m.medido_en) AND (d.nombre IN ($distrito) OR d.nombre IS NULL) ORDER BY 1",
           "rawQuery": true
         }
       ]
@@ -39,7 +52,23 @@
         {
           "refId": "A",
           "format": "time_series",
-          "rawSql": "SELECT p.timestamp_prediccion AS \"time\", e.nombre AS metric, p.valor_predicho AS valor FROM predicciones_pm25 p JOIN estaciones e ON e.id = p.estacion_id WHERE p.generado_en = (SELECT max(generado_en) FROM predicciones_pm25) ORDER BY 1",
+          "rawSql": "SELECT p.timestamp_prediccion AS \"time\", e.nombre || ' (' || coalesce(d.nombre, 'sin distrito') || ')' AS metric, p.valor_predicho AS valor FROM predicciones_pm25 p JOIN estaciones e ON e.id = p.estacion_id LEFT JOIN distritos d ON d.id = e.distrito_id WHERE p.generado_en = (SELECT max(generado_en) FROM predicciones_pm25) AND (d.nombre IN ($distrito) OR d.nombre IS NULL) ORDER BY 1",
+          "rawQuery": true
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Cobertura de monitoreo por distrito (43 distritos)",
+      "type": "table",
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 20 },
+      "datasource": { "type": "postgres", "uid": "postgres-lima-ambiental" },
+      "description": "Cuántas estaciones de aire tiene cada distrito — los distritos en 0 no tienen monitoreo (típico: la red real de estaciones en Perú es mucho más chica que 43).",
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT d.nombre AS distrito, count(e.id) AS estaciones FROM distritos d LEFT JOIN estaciones e ON e.distrito_id = d.id WHERE d.nivel = 'distrital' GROUP BY d.nombre ORDER BY estaciones DESC, distrito",
           "rawQuery": true
         }
       ]

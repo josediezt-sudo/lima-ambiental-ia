@@ -12,16 +12,17 @@ def get_connection():
     return psycopg2.connect(database_url)
 
 
-def upsert_estacion(cur, fuente: str, id_externo: str, nombre: str, lat, lon, distrito=None) -> int:
+def upsert_estacion(cur, fuente: str, id_externo: str, nombre: str, lat, lon, distrito_id=None) -> int:
     cur.execute(
         """
-        INSERT INTO estaciones (fuente, id_externo, nombre, distrito, lat, lon)
+        INSERT INTO estaciones (fuente, id_externo, nombre, distrito_id, lat, lon)
         VALUES (%s, %s, %s, %s, %s, %s)
         ON CONFLICT (fuente, id_externo) DO UPDATE
-            SET nombre = EXCLUDED.nombre, lat = EXCLUDED.lat, lon = EXCLUDED.lon
+            SET nombre = EXCLUDED.nombre, lat = EXCLUDED.lat, lon = EXCLUDED.lon,
+                distrito_id = COALESCE(EXCLUDED.distrito_id, estaciones.distrito_id)
         RETURNING id
         """,
-        (fuente, id_externo, nombre, distrito, lat, lon),
+        (fuente, id_externo, nombre, distrito_id, lat, lon),
     )
     return cur.fetchone()[0]
 

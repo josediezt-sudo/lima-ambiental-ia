@@ -1,9 +1,16 @@
 # Sistema Local de Gestión Ambiental (SLGA)
 
-Este proyecto no solo monitorea datos técnicos (aire, residuos): también modela el
-**Sistema Local de Gestión Ambiental** que toda municipalidad peruana debe operar,
-para que el mismo repositorio sirva como base de gestión institucional y no solo
-como dashboard de sensores.
+Este proyecto no solo monitorea datos técnicos (aire, residuos, agua, ruido,
+áreas verdes, incendios): también modela el **Sistema Local de Gestión
+Ambiental** que toda municipalidad peruana debe operar, para que el mismo
+repositorio sirva como base de gestión institucional y no solo como dashboard de
+sensores.
+
+Lima Metropolitana tiene **44 gobiernos locales independientes** (1 municipalidad
+provincial + 43 distritales), cada uno con su propia CAM y sus propios
+instrumentos de gestión — por eso cada fila de las tablas de este módulo lleva un
+`distrito_id`. Ver [`docs/distritos.md`](distritos.md) para el detalle de cómo se
+modela y se resuelve el distrito de cada dato.
 
 ## Marco legal
 
@@ -43,18 +50,25 @@ automático, y por eso conviene mantenerla simple: el valor no está en automati
 algo que no tiene fuente automatizable, sino en tener un lugar único, versionado y
 con dashboard, donde esa información viva junto a los datos técnicos.
 
-## Personalizar para tu municipalidad
+## Cargar datos de tu distrito
 
-1. Copia `config/municipio.example.yml` a `config/municipio.yml` y edítalo (nombre,
-   tipo de municipalidad, coordenadas de monitoreo, composición esperada de la CAM).
-2. (Opcional, para probar el dashboard antes de tener datos reales) carga el set de
-   ejemplo: `python -m src.slga.cli seed-ejemplo`.
-3. Reemplaza los datos de ejemplo por los reales de tu municipalidad usando los
-   comandos `*-add` de `src/slga/cli.py` (ver el docstring del archivo para el uso
-   completo de cada subcomando).
-4. Abre el dashboard **"Gestión Ambiental Municipal - SLGA"** en Grafana.
+1. Corre `python -m src.slga.cli distritos` para ver los 44 nombres válidos
+   (43 distritos + "Lima Metropolitana" para el ámbito provincial).
+2. (Opcional, para probar el dashboard antes de tener datos reales) carga el set
+   de ejemplo: `python -m src.slga.cli seed-ejemplo` — cubre 3 gobiernos locales
+   a modo de muestra (Lima Metropolitana, San Isidro, San Juan de Lurigancho).
+3. Reemplaza los datos de ejemplo por los reales de cada distrito con los
+   comandos `*-add` de `src/slga/cli.py`, pasando siempre `--distrito "Nombre"`
+   (ver el docstring del archivo para el uso completo de cada subcomando).
+4. Abre el dashboard **"Gestión Ambiental Municipal - SLGA"** en Grafana — tiene
+   un filtro de distrito arriba para ver uno, varios, o los 44 a la vez.
 
-Nada de esto depende de que la municipalidad sea Lima: los nombres, tipos
-(`provincial`/`distrital`) y coordenadas viven en `config/municipio.yml`, que está
-fuera de git para que cada despliegue tenga el suyo sin generar conflictos con el
-repositorio compartido.
+## Adaptar esto a otra ciudad (fuera de Lima)
+
+Este proyecto pasó de modelar una sola municipalidad genérica a modelar
+específicamente los 44 gobiernos locales de Lima Metropolitana (tabla
+`distritos`, sembrada en `sql/schema.sql`). Para otra ciudad/provincia, reemplaza
+el seed de `distritos` por la lista de gobiernos locales de esa provincia — el
+resto del modelo (instrumentos, CAM, PLANEFA, GALS, indicadores por distrito)
+funciona igual, siempre que exista una tabla `distritos` con al menos `id`,
+`nombre` y `nivel`.

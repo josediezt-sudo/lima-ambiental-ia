@@ -1,5 +1,4 @@
 .env
-config/municipio.yml
 .venv/
 __pycache__/
 *.pyc

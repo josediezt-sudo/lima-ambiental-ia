@@ -13,6 +13,7 @@ import sys
 from datetime import datetime
 
 from src.db import get_connection, upsert_estacion, upsert_medicion_aire
+from src.distritos import cargar_distritos, distrito_mas_cercano
 
 MAPEO_COLUMNAS = {
     "estacion": "estacion",
@@ -29,17 +30,22 @@ def ejecutar(ruta_csv: str) -> None:
     conn = get_connection()
     filas_procesadas = 0
     try:
+        distritos = cargar_distritos(conn)
         with conn.cursor() as cur, open(ruta_csv, newline="", encoding="utf-8") as f:
             lector = csv.DictReader(f)
             for fila in lector:
                 nombre_estacion = fila[MAPEO_COLUMNAS["estacion"]]
+                lat = fila.get(MAPEO_COLUMNAS["lat"]) or None
+                lon = fila.get(MAPEO_COLUMNAS["lon"]) or None
+                distrito = distrito_mas_cercano(distritos, float(lat) if lat else None, float(lon) if lon else None)
                 estacion_id = upsert_estacion(
                     cur,
                     fuente="senamhi",
                     id_externo=nombre_estacion,
                     nombre=nombre_estacion,
-                    lat=fila.get(MAPEO_COLUMNAS["lat"]) or None,
-                    lon=fila.get(MAPEO_COLUMNAS["lon"]) or None,
+                    lat=lat,
+                    lon=lon,
+                    distrito_id=distrito["id"] if distrito else None,
                 )
 
                 medido_en = datetime.fromisoformat(fila[MAPEO_COLUMNAS["fecha_hora"]])

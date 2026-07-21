@@ -1,10 +1,23 @@
 {
-  "title": "Gestión Ambiental Municipal - SLGA",
+  "title": "Gestión Ambiental Municipal - SLGA (44 gobiernos locales)",
   "uid": "slga-municipal",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 2,
   "timezone": "America/Lima",
   "time": { "from": "now-1y", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "distrito",
+        "type": "query",
+        "datasource": { "type": "postgres", "uid": "postgres-lima-ambiental" },
+        "query": "SELECT nombre FROM distritos ORDER BY nivel DESC, nombre",
+        "multi": true,
+        "includeAll": true,
+        "current": { "text": "All", "value": "$__all" }
+      }
+    ]
+  },
   "panels": [
     {
       "id": 1,
@@ -19,7 +32,7 @@
         {
           "refId": "A",
           "format": "table",
-          "rawSql": "SELECT count(*) AS valor FROM instrumentos_gestion_ambiental WHERE estado = 'vigente'",
+          "rawSql": "SELECT count(*) AS valor FROM instrumentos_gestion_ambiental t JOIN distritos d ON d.id = t.distrito_id WHERE t.estado = 'vigente' AND d.nombre IN ($distrito)",
           "rawQuery": true
         }
       ]
@@ -37,7 +50,7 @@
         {
           "refId": "A",
           "format": "table",
-          "rawSql": "SELECT count(*) AS valor FROM instrumentos_gestion_ambiental WHERE estado IN ('vencido', 'desactualizado')",
+          "rawSql": "SELECT count(*) AS valor FROM instrumentos_gestion_ambiental t JOIN distritos d ON d.id = t.distrito_id WHERE t.estado IN ('vencido', 'desactualizado') AND d.nombre IN ($distrito)",
           "rawQuery": true
         }
       ]
@@ -52,7 +65,7 @@
         {
           "refId": "A",
           "format": "table",
-          "rawSql": "SELECT count(*) AS valor FROM cam_sesiones WHERE date_part('year', fecha) = date_part('year', now())",
+          "rawSql": "SELECT count(*) AS valor FROM cam_sesiones t JOIN distritos d ON d.id = t.distrito_id WHERE date_part('year', t.fecha) = date_part('year', now()) AND d.nombre IN ($distrito)",
           "rawQuery": true
         }
       ]
@@ -68,7 +81,7 @@
         {
           "refId": "A",
           "format": "table",
-          "rawSql": "SELECT round(100.0 * count(*) FILTER (WHERE estado = 'ejecutada') / greatest(count(*), 1)) AS valor FROM planefa_acciones WHERE anio = date_part('year', now())::int",
+          "rawSql": "SELECT round(100.0 * count(*) FILTER (WHERE t.estado = 'ejecutada') / greatest(count(*), 1)) AS valor FROM planefa_acciones t JOIN distritos d ON d.id = t.distrito_id WHERE t.anio = date_part('year', now())::int AND d.nombre IN ($distrito)",
           "rawQuery": true
         }
       ]
@@ -83,7 +96,7 @@
         {
           "refId": "A",
           "format": "table",
-          "rawSql": "SELECT tipo, nombre, estado, fecha_aprobacion, fecha_revision_prevista, responsable FROM instrumentos_gestion_ambiental ORDER BY fecha_revision_prevista NULLS LAST",
+          "rawSql": "SELECT d.nombre AS distrito, t.tipo, t.nombre, t.estado, t.fecha_aprobacion, t.fecha_revision_prevista, t.responsable FROM instrumentos_gestion_ambiental t JOIN distritos d ON d.id = t.distrito_id WHERE d.nombre IN ($distrito) ORDER BY t.fecha_revision_prevista NULLS LAST",
           "rawQuery": true
         }
       ]
@@ -98,7 +111,7 @@
         {
           "refId": "A",
           "format": "table",
-          "rawSql": "SELECT institucion, sector, representante, cargo FROM cam_integrantes WHERE vigente = true ORDER BY sector, institucion",
+          "rawSql": "SELECT d.nombre AS distrito, t.institucion, t.sector, t.representante, t.cargo FROM cam_integrantes t JOIN distritos d ON d.id = t.distrito_id WHERE t.vigente = true AND d.nombre IN ($distrito) ORDER BY d.nombre, t.institucion",
           "rawQuery": true
         }
       ]
@@ -113,7 +126,7 @@
         {
           "refId": "A",
           "format": "table",
-          "rawSql": "SELECT unidad_fiscalizable, tipo_accion, trimestre_programado, estado, resultado FROM planefa_acciones WHERE anio = date_part('year', now())::int ORDER BY trimestre_programado",
+          "rawSql": "SELECT d.nombre AS distrito, t.unidad_fiscalizable, t.tipo_accion, t.trimestre_programado, t.estado, t.resultado FROM planefa_acciones t JOIN distritos d ON d.id = t.distrito_id WHERE t.anio = date_part('year', now())::int AND d.nombre IN ($distrito) ORDER BY t.trimestre_programado",
           "rawQuery": true
         }
       ]
@@ -129,7 +142,7 @@
         {
           "refId": "A",
           "format": "table",
-          "rawSql": "SELECT dimension, indicador, nivel_objetivo, avance_pct, fecha_corte FROM indicadores_gals ORDER BY fecha_corte DESC",
+          "rawSql": "SELECT d.nombre AS distrito, t.dimension, t.indicador, t.nivel_objetivo, t.avance_pct, t.fecha_corte FROM indicadores_gals t JOIN distritos d ON d.id = t.distrito_id WHERE d.nombre IN ($distrito) ORDER BY t.fecha_corte DESC",
           "rawQuery": true
         }
       ]

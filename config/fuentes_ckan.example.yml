@@ -1,0 +1,39 @@
+# Copia a config/fuentes_ckan.yml y completa cada package_id real antes de usar.
+# Cada entrada carga un indicador periódico por distrito (agua, ruido, áreas
+# verdes...) desde un dataset CKAN de datosabiertos.gob.pe hacia la tabla
+# `indicadores_ambientales_distrito`.
+#
+# IMPORTANTE: no se pudo verificar en vivo ningún package_id desde este entorno de
+# desarrollo (bloqueo de red al portal) — los "TODO" de abajo son una plantilla
+# estructural, no datasets confirmados. Búscalos en datosabiertos.gob.pe y
+# reemplázalos, y ajusta `columnas` al nombre real de cada campo del CSV.
+
+- nombre: cobertura_agua_potable
+  dominio: agua
+  indicador: cobertura_agua_potable_pct
+  unidad: "%"
+  package_id: "TODO-buscar-dataset-agua-en-datosabiertos.gob.pe"
+  columnas:
+    distrito: distrito
+    anio: anio
+    valor: cobertura_pct
+
+- nombre: nivel_ruido_ambiental
+  dominio: ruido
+  indicador: nivel_ruido_leq_db
+  unidad: dB
+  package_id: "TODO-buscar-dataset-ruido-en-datosabiertos.gob.pe"
+  columnas:
+    distrito: distrito
+    anio: anio
+    valor: nivel_leq
+
+- nombre: areas_verdes_por_habitante
+  dominio: areas_verdes
+  indicador: m2_area_verde_por_habitante
+  unidad: "m2/hab"
+  package_id: "TODO-buscar-dataset-areas-verdes-en-datosabiertos.gob.pe"
+  columnas:
+    distrito: distrito
+    anio: anio
+    valor: m2_por_habitante

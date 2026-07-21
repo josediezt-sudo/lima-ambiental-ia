@@ -1,0 +1,78 @@
+name: Ingesta ambiental programada
+
+# IMPORTANTE: estos jobs corren en la infraestructura de GitHub, así que
+# DATABASE_URL debe apuntar a un Postgres accesible desde internet (ej. un
+# Postgres administrado en la nube) — el `docker compose up` local de
+# desarrollo, en tu máquina, no es alcanzable desde aquí.
+#
+# Aire e incendios se actualizan cada hora (lo más seguido que tiene sentido
+# dado que OpenAQ agrega por hora y FIRMS publica cada ~3h). Los dominios
+# periódicos (residuos, agua, ruido, áreas verdes) corren una vez al día,
+# porque las fuentes oficiales peruanas los publican como reportes anuales,
+# no como series en tiempo real — correrlos cada hora no traería datos nuevos.
+
+on:
+  schedule:
+    - cron: "0 * * * *"   # cada hora, en punto: aire + incendios
+    - cron: "30 6 * * *"  # una vez al día, 06:30 UTC: dominios periódicos
+  workflow_dispatch: {}    # permite correrlo manualmente desde la pestaña Actions
+
+jobs:
+  aire-e-incendios:
+    if: github.event.schedule == '0 * * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Ingesta de aire (OpenAQ)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          OPENAQ_API_KEY: ${{ secrets.OPENAQ_API_KEY }}
+        run: python -m src.ingest.run_ingest aire
+      - name: Ingesta de incendios (NASA FIRMS)
+        if: ${{ secrets.FIRMS_MAP_KEY != '' }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          FIRMS_MAP_KEY: ${{ secrets.FIRMS_MAP_KEY }}
+        run: python -m src.ingest.run_ingest incendios
+      - name: Predicción PM2.5
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python -m src.modelos.prediccion_pm25
+
+  dominios-periodicos:
+    if: github.event.schedule == '30 6 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Ingesta de residuos (PNDA)
+        if: ${{ secrets.RESIDUOS_CKAN_PACKAGE_ID != '' }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          RESIDUOS_CKAN_BASE_URL: https://www.datosabiertos.gob.pe
+          RESIDUOS_CKAN_PACKAGE_ID: ${{ secrets.RESIDUOS_CKAN_PACKAGE_ID }}
+        run: python -m src.ingest.run_ingest residuos
+      - name: Ingesta de agua, ruido y áreas verdes (PNDA)
+        # Requiere que config/fuentes_ckan.yml exista en el repo con package_id
+        # reales (no lleva secretos, son ids de datasets públicos — commitealo
+        # directo, ver config/fuentes_ckan.example.yml).
+        if: hashFiles('config/fuentes_ckan.yml') != ''
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          python -m src.ingest.run_ingest agua
+          python -m src.ingest.run_ingest ruido
+          python -m src.ingest.run_ingest areas_verdes
+      - name: Ingesta de bosques/lomas costeras (Global Forest Watch)
+        if: ${{ secrets.GFW_API_KEY != '' }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GFW_API_KEY: ${{ secrets.GFW_API_KEY }}
+        run: python -m src.ingest.run_ingest bosques

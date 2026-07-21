@@ -1,105 +1,132 @@
 # Datos de ejemplo para probar el dashboard SLGA sin tener que cargar información
 # real primero. Cárgalos con: python -m src.slga.cli seed-ejemplo
-# Reemplázalos por los datos reales de tu municipalidad cuando estés listo
-# (puedes editar este archivo directamente o usar los comandos *-add de la CLI).
+#
+# Cada item lleva un campo `distrito` (nombre exacto de la tabla `distritos` —
+# usa "Lima Metropolitana" para instrumentos/CAM de ámbito provincial). Aquí se
+# usan tres gobiernos locales a modo de ejemplo (Lima Metropolitana, San Isidro,
+# San Juan de Lurigancho) para mostrar el modelo multi-distrital funcionando;
+# reemplázalos por los datos reales de cada uno de los 44 cuando estés listo.
 
 instrumentos:
-  - tipo: politica_ambiental_local
+  - distrito: "Lima Metropolitana"
+    tipo: politica_ambiental_local
     nombre: "Política Ambiental Local 2024-2030"
     estado: vigente
-    norma_aprobacion: "Ordenanza N° 001-2024-MDX"
+    norma_aprobacion: "Ordenanza N° 001-2024-MML"
     fecha_aprobacion: "2024-02-15"
     fecha_revision_prevista: "2030-02-15"
-    responsable: "Gerencia de Servicios a la Ciudad y Gestión Ambiental"
+    responsable: "Gerencia de Servicios a la Ciudad y Gestión Ambiental (MML)"
 
-  - tipo: diagnostico_ambiental_local
-    nombre: "Diagnóstico Ambiental Local (DAL) 2023"
+  - distrito: "Lima Metropolitana"
+    tipo: diagnostico_ambiental_local
+    nombre: "Diagnóstico Ambiental Local (DAL) 2023 — Lima Metropolitana"
     estado: vigente
     fecha_aprobacion: "2023-11-30"
     fecha_revision_prevista: "2027-11-30"
 
-  - tipo: plan_accion_ambiental_local
-    nombre: "Plan de Acción Ambiental Local (PAAL) 2024-2026"
+  - distrito: "Lima Metropolitana"
+    tipo: plan_accion_ambiental_local
+    nombre: "Plan de Acción Ambiental Local (PAAL) 2024-2026 — Lima Metropolitana"
     estado: vigente
     fecha_aprobacion: "2024-03-01"
     fecha_revision_prevista: "2026-12-31"
 
-  - tipo: agenda_ambiental_local
-    nombre: "Agenda Ambiental Local 2025-2026"
+  - distrito: "Lima Metropolitana"
+    tipo: planefa
+    nombre: "PLANEFA 2026 — Lima Metropolitana"
+    estado: vigente
+    fecha_aprobacion: "2026-01-15"
+    fecha_revision_prevista: "2026-12-31"
+
+  - distrito: "San Isidro"
+    tipo: agenda_ambiental_local
+    nombre: "Agenda Ambiental Local 2025-2026 — San Isidro"
     estado: en_elaboracion
     fecha_revision_prevista: "2026-08-31"
-    responsable: "CAM"
+    responsable: "CAM San Isidro"
 
-  - tipo: pigars
-    nombre: "Plan Integral de Gestión Ambiental de Residuos Sólidos"
+  - distrito: "San Juan de Lurigancho"
+    tipo: pigars
+    nombre: "Plan Integral de Gestión Ambiental de Residuos Sólidos — SJL"
     estado: desactualizado
     fecha_aprobacion: "2018-05-20"
     fecha_revision_prevista: "2026-09-30"
     notas: "Pendiente actualizar bajo el marco del Decreto Legislativo 1278"
 
-  - tipo: planefa
-    nombre: "PLANEFA 2026"
-    estado: vigente
-    fecha_aprobacion: "2026-01-15"
-    fecha_revision_prevista: "2026-12-31"
-
 cam_integrantes:
-  - institucion: "Municipalidad (Alcaldía)"
+  - distrito: "Lima Metropolitana"
+    institucion: "Municipalidad Metropolitana de Lima (Alcaldía)"
     sector: publico
     representante: "Alcalde/sa"
     cargo: "Presidencia CAM"
     fecha_incorporacion: "2023-01-01"
-  - institucion: "Gerencia de Servicios a la Ciudad y Gestión Ambiental"
+  - distrito: "Lima Metropolitana"
+    institucion: "Gerencia de Servicios a la Ciudad y Gestión Ambiental"
     sector: publico
     cargo: "Secretaría Técnica"
     fecha_incorporacion: "2023-01-01"
-  - institucion: "Cámara de Comercio local"
+  - distrito: "San Isidro"
+    institucion: "Municipalidad de San Isidro (Alcaldía)"
+    sector: publico
+    cargo: "Presidencia CAM"
+    fecha_incorporacion: "2023-01-01"
+  - distrito: "San Isidro"
+    institucion: "Cámara de Comercio local"
     sector: privado
     fecha_incorporacion: "2023-02-01"
-  - institucion: "Asociación de vecinos"
+  - distrito: "San Isidro"
+    institucion: "Asociación de vecinos"
     sector: sociedad_civil
     fecha_incorporacion: "2023-02-01"
 
 cam_sesiones:
-  - fecha: "2026-02-10"
+  - distrito: "Lima Metropolitana"
+    fecha: "2026-02-10"
     tipo: ordinaria
-    asistentes: 14
-    acuerdos: "Aprobación del plan de trabajo anual de la CAM"
-  - fecha: "2026-05-12"
+    asistentes: 22
+    acuerdos: "Aprobación del plan de trabajo anual de la CAM Metropolitana"
+  - distrito: "San Isidro"
+    fecha: "2026-05-12"
     tipo: ordinaria
     asistentes: 11
-    acuerdos: "Seguimiento a la actualización del PIGARS"
+    acuerdos: "Seguimiento a la Agenda Ambiental Local 2025-2026"
 
 planefa_acciones:
-  - anio: 2026
+  - distrito: "San Isidro"
+    anio: 2026
     unidad_fiscalizable: "Comercio ambulatorio - zona centro"
     tipo_accion: supervision
     trimestre_programado: 1
     estado: ejecutada
     resultado: "Sin hallazgos relevantes"
-  - anio: 2026
+  - distrito: "San Isidro"
+    anio: 2026
     unidad_fiscalizable: "Puntos críticos de acumulación de residuos"
     tipo_accion: monitoreo
     trimestre_programado: 2
     estado: ejecutada
-  - anio: 2026
+  - distrito: "San Juan de Lurigancho"
+    anio: 2026
     unidad_fiscalizable: "Establecimientos con emisiones de ruido"
     tipo_accion: supervision
     trimestre_programado: 3
     estado: programada
 
 indicadores_gals:
-  - dimension: calidad_ambiental
-    indicador: "Cobertura de monitoreo de calidad de aire"
+  - distrito: "Lima Metropolitana"
+    dimension: calidad_ambiental
+    indicador: "Cobertura de monitoreo de calidad de aire (43 distritos)"
     nivel_objetivo: "GALS I"
     avance_pct: 65
     fecha_corte: "2026-06-30"
-  - dimension: institucionalidad_ciudadania
+  - distrito: "San Isidro"
+    dimension: institucionalidad_ciudadania
     indicador: "Instrumentos de gestión ambiental vigentes"
     nivel_objetivo: "GALS I"
     avance_pct: 70
     fecha_corte: "2026-06-30"
-  - dimension: aprovechamiento_rrnn_cc
+  - distrito: "San Juan de Lurigancho"
+    dimension: aprovechamiento_rrnn_cc
     indicador: "Acciones de adaptación al cambio climático implementadas"
     nivel_objetivo: "GALS I"
     avance_pct: 40
